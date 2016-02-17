@@ -30,7 +30,7 @@ vec2 tilepos = vec2(5, 19); // The position of the current tile using grid coord
 
 // An array storing all possible orientations of all possible tiles
 // The 'tile' array will always be some element [i][j] of this array (an array of vec2)
-vec2 allRotations[18][4] = {
+vec2 allRotations[24][4] = {
 	// right L (1, 2, 3(center), 4)
 	{vec2(-1, -1), vec2(-1, 0), vec2(0, 0), vec2(1, 0)}, 	
 	{vec2(1, -1), vec2(0, -1), vec2(0, 0), vec2(0, 1)},     
@@ -39,27 +39,34 @@ vec2 allRotations[18][4] = {
 
 	// left L (1, 2, 3(center), 4)
 	{vec2(1, -1), vec2(1, 0), vec2(0, 0), vec2(-1, 0)},
-	{vec2(-1, -1), vec2(0, -1), vec2(0, 0), vec2(0, 1)},     
+	{vec2(1, 1), vec2(0, 1), vec2(0, 0), vec2(0, -1)},     
 	{vec2(-1, 1), vec2(-1, 0), vec2(0, 0), vec2(1, 0)},  
-	{vec2(1, 1), vec2(0, 1), vec2(0, 0), vec2(0, -1)},
+	{vec2(-1, -1), vec2(0, -1), vec2(0, 0), vec2(0, 1)},
 
 	// T (1, 2(center), 3, 4)
 	{vec2(-1, 0), vec2(0, 0), vec2(1, 0), vec2(0, -1)},
 	{vec2(0, -1), vec2(0, 0), vec2(0, 1), vec2(1, 0)},     
-	{vec2(-1, 0), vec2(0, 0), vec2(1, 0), vec2(0, 1)},  
+	{vec2(1, 0), vec2(0, 0), vec2(-1, 0), vec2(0, 1)},  
 	{vec2(0, 1), vec2(0, 0), vec2(0, -1), vec2(-1, 0)},	
 
 	// I (1, 2(center), 3, 4)
 	{vec2(0, 1), vec2(0, 0), vec2(0, -1), vec2(0, -2)}, 
 	{vec2(-1, 0), vec2(0, 0), vec2(1, 0), vec2(2, 0)},
+	{vec2(0, -1), vec2(0, 0), vec2(0, 1), vec2(0, 2)},
+	{vec2(1, 0), vec2(0, 0), vec2(-1, 0), vec2(-2, 0)},
 
 	// right S (1, 2(center), 3, 4)
 	{vec2(-1, 0), vec2(0, 0), vec2(0, 1), vec2(1, 1)},
 	{vec2(0, -1), vec2(0, 0), vec2(-1, 0), vec2(-1, 1)},
+	{vec2(1, 0), vec2(0, 0), vec2(0, -1), vec2(-1, -1)},
+	{vec2(0, 1), vec2(0, 0), vec2(1, 0), vec2(1, -1)},
 
 	// left S (1, 2(center), 3, 4)
 	{vec2(-1, 0), vec2(0, 0), vec2(0, -1), vec2(1, -1)},
-	{vec2(0, -1), vec2(0, 0), vec2(1, 0), vec2(1, 1)}
+	{vec2(0, -1), vec2(0, 0), vec2(1, 0), vec2(1, 1)},
+	{vec2(1, 0), vec2(0, 0), vec2(0, 1), vec2(-1, 1)},
+	{vec2(0, 1), vec2(0, 0), vec2(-1, 0), vec2(-1, -1)}
+
 };
 
 // colours
@@ -129,32 +136,45 @@ void updatetile()
 
 //-------------------------------------------------------------------------------------------------------------------
 
+void shiftfix(int x, int y)
+{
+	int locX = tilepos[0] + x;
+	int locY = tilepos[1] + y;
+
+
+	if (locX < 0)
+	{
+		tilepos[0] = tilepos[0] - x;
+	} 
+	else if (locX > 9)
+	{
+		tilepos[0] = 8;
+	}
+
+	if (locY > 19)
+	{
+		tilepos[1] = 18;
+	}
+}
+
+//-------------------------------------------------------------------------------------------------------------------
+
 // Called at the start of play and every time a tile is placed
 void newtile()
 {
 	srand(time(NULL));
-	tilepos = vec2(5 , 19); // Put the tile at the top of the board
+	tilepos = vec2(rand() % 10, 19); // Put the tile at the top of the board
 
 	int block = rand() % 6;
-	int orientation = 0;
-
-	if (block < 3) {
-		orientation = rand() % 4; // Blocks 0, 1, and 2 have 4 orientations
-	} else {
-		orientation = rand() % 2; // Blocks 3, 4, and 5 have 2 orientations
-	}
+	int orientation = rand() % 4;
 
 	// Update the geometry VBO of current tile
-	// int block = rand() % 18;
-	if (block < 3) 	{
-		for (int i = 0; i < 4; i++) {
-			tile[i] = allRotations[block * 4 + orientation][i]; // Get the 4 pieces of the new tile
-		}
-	} else {
-		for (int i = 0; i < 4; i++) {
-			tile[i] = allRotations[12 + (block - 3) * 2 + orientation][i]; // Get the 4 pieces of the new tile
-		}		
+
+	for (int i = 0; i < 4; i++) {
+		tile[i] = allRotations[block * 4 + orientation][i]; // Get the 4 pieces of the new tile
+		shiftfix(tilepos[0], tilepos[1]);
 	}
+
 	updatetile(); 
 
 	// Update the color VBO of current tile
@@ -317,12 +337,71 @@ void init()
 
 //-------------------------------------------------------------------------------------------------------------------
 
+// Given (x,y), tries to move the tile x squares to the right and y squares down
+// Returns true if the tile was successfully moved, or false if there was some issue
+bool movetile(vec2 direction)
+{
+	for (int i = 0; i < 4; i++)
+	{
+		int locX = tilepos[0] + tile[i][0] + direction[0];
+		int locY = tilepos[1] + tile[i][1] + direction[1];
+
+		if (locX < 0 || locX > 9) // checks if X and Y are in the bounds of the game space
+			return false;
+		if (locY < 0 || locY > 19)
+			return false;
+		if (board[locX][locY]) // checks if the location of X and Y is occupied (if true, return false)
+			return false;
+	}
+	return true;
+}
+
+//-------------------------------------------------------------------------------------------------------------------
+
 // Rotates the current tile, if there is room
 void rotate()
-{      
+{   
+	int oldorientation = -1;
+	int neworientation = -1;
+	int j;
 
+	for (int i = 0; i < 24; i++) 
+	{
+		for (j = 0; j < 4; j++) 
+		{
+			if (tile[j][0] != allRotations[i][j][0])
+				break;
+			else if (tile[j][1] != allRotations[i][j][1])
+				break;
+		}
 
+		if (j == 4) {
+			oldorientation = i; 
+			neworientation = oldorientation + 1;		
+			break;			
+		}
+	}
 
+	// Checks if it's at the end of one of the shape's rotations
+	if (neworientation >= 0 && neworientation % 4 == 0) 
+	{
+		neworientation = neworientation - 4;
+	}
+
+	// Changes the current tile to the next orientation
+	for (int i = 0; i < 4; i++) 
+	{
+		tile[i] = allRotations[neworientation][i];
+	}
+
+	// Reverts changes if the current tile is out of the game space
+	if (!movetile(vec2(0,0)) && oldorientation >= 0)
+	{
+		for (int i = 0; i < 4; i++) 
+		{
+			tile[i] = allRotations[oldorientation][i];
+		}		
+	}	
 }
 
 //-------------------------------------------------------------------------------------------------------------------
@@ -363,31 +442,13 @@ void settile()
 
 //-------------------------------------------------------------------------------------------------------------------
 
-// Given (x,y), tries to move the tile x squares to the right and y squares down
-// Returns true if the tile was successfully moved, or false if there was some issue
-bool movetile(vec2 direction)
-{
-	for (int i = 0; i < 4; i++)
-	{
-		int locX = tilepos[0] + tile[i][0] + direction[0];
-		int locY = tilepos[1] + tile[i][1] + direction[1];
-
-		if (locX < 0 || locX > 9) // checks if X and Y are in the bounds of the game space
-			return false;
-		if (locY < 0 || locY > 19)
-			return false;
-		if (board[locX][locY]) // checks if the location of X and Y is occupied (if true, return false)
-			return false;
-	}
-	return true;
-}
-//-------------------------------------------------------------------------------------------------------------------
-
 // Starts the game over - empties the board, creates new tiles, resets line counters
 void restart()
 {
-
+	initBoard();
+	newtile();
 }
+
 //-------------------------------------------------------------------------------------------------------------------
 
 // Draws the game
@@ -434,6 +495,7 @@ void special(int key, int x, int y)
 			rotate();
 			break;
 		case GLUT_KEY_DOWN:
+			if (movetile(vec2(0,-1))) tilepos[1] = tilepos[1] - 1;
 			break;
 		case GLUT_KEY_RIGHT:
 			if (movetile(vec2(1,0))) tilepos[0] = tilepos[0] + 1;
