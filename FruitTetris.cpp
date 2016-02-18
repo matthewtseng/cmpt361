@@ -141,7 +141,6 @@ void shiftfix(int x, int y)
 	int locX = tilepos[0] + x;
 	int locY = tilepos[1] + y;
 
-
 	if (locX < 0)
 	{
 		tilepos[0] = tilepos[0] - x;
@@ -410,7 +409,49 @@ void rotate()
 // If every cell in the row is occupied, it will clear that cell and everything above it will shift down one row
 void checkfullrow(int row)
 {
+	int i;
+	int isrowfull = 0;
 
+	// Checks every cell in a row 
+	for (i = 0; i < 10; i++) 
+	{
+		// If a cell is empty, break out of loop and do not need to check any further
+		if (board[i][row] == true) 
+		{
+			isrowfull++;
+		}
+	}
+
+	// Check if the row is full (10 tiles across)
+	if (isrowfull != 10) return;
+
+	// Shift down all rows above
+	for (i = row; i < 20; i++)
+	{
+		// Values of board is shifted down
+		for (int j = 0; j < 10; j++) 
+		{
+			board[j][i] = board[j][i + 1];
+
+			// Colour of the board is shifted down
+			for (int k = 0; k < 6; k++)
+			{
+				boardcolours[j * 6 + i * 60 + k] = boardcolours[j * 6 + (i + 1) * 60 + k];
+			}
+		}
+	}
+
+	glBindBuffer(GL_ARRAY_BUFFER, vboIDs[3]);
+	glBufferData(GL_ARRAY_BUFFER, 1200*sizeof(vec4), boardcolours, GL_DYNAMIC_DRAW);
+}
+
+//-------------------------------------------------------------------------------------------------------------------
+
+vec4 gettilecolour(vec2 loc)
+{
+	// Grabs the colour from the corresponding location on the board
+	//return boardcolours[loc[0] * 6 + loc[1] * 60];
+	return 1;
 }
 
 //-------------------------------------------------------------------------------------------------------------------
@@ -436,8 +477,16 @@ void settile()
 		boardcolours[locX * 6 + locY * 60 + 5] 	= colours[i * 6 + 5];
 	}
 
+	// Checks if rows are full and shifts down the rows above (does not work entirely)
+	// for (int i = 0; i < 20; i++)
+	// {
+	// 	checkfullrow(i);
+	// }
+
 	glBindBuffer(GL_ARRAY_BUFFER, vboIDs[3]);
 	glBufferData(GL_ARRAY_BUFFER, 1200*sizeof(vec4), boardcolours, GL_DYNAMIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
 }
 
 //-------------------------------------------------------------------------------------------------------------------
