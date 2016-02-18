@@ -493,15 +493,25 @@ void special(int key, int x, int y)
 	{
 		case GLUT_KEY_UP:
 			rotate();
+			updatetile();
 			break;
 		case GLUT_KEY_DOWN:
-			if (movetile(vec2(0,-1))) tilepos[1] = tilepos[1] - 1;
+			if (movetile(vec2(0,-1))) {
+				tilepos[1] = tilepos[1] - 1;
+				updatetile();
+			}
 			break;
 		case GLUT_KEY_RIGHT:
-			if (movetile(vec2(1,0))) tilepos[0] = tilepos[0] + 1;
+			if (movetile(vec2(1,0))) {
+				tilepos[0] = tilepos[0] + 1;
+				updatetile();
+			}
 			break;
 		case GLUT_KEY_LEFT:
-			if (movetile(vec2(-1,0))) tilepos[0] = tilepos[0] - 1;	
+			if (movetile(vec2(-1,0))) {
+				tilepos[0] = tilepos[0] - 1;	
+				updatetile();
+			}
 			break;
 		default:
 			break;
