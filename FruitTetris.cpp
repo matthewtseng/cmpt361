@@ -81,13 +81,13 @@ vec4 black  = vec4(0.0, 0.0, 0.0, 1.0);
 // all colours
 vec4 allColours[5] = {orange, red, purple, green, yellow};
 
-//board[x][y] represents whether the cell (x,y) is occupied
+// board[x][y] represents whether the cell (x,y) is occupied
 bool board[10][20]; 
 
-//An array containing the colour of each of the 10*20*2*3 vertices that make up the board
-//Initially, all will be set to black. As tiles are placed, sets of 6 vertices (2 triangles; 1 square)
-//will be set to the appropriate colour in this array before updating the corresponding VBO
-vec4 boardcolours[1200];
+// An array containing the colour of each of the 10*20*2*3 vertices that make up the board
+// Initially, all will be set to black. As tiles are placed, sets of 6 vertices (2 triangles; 1 square)
+// will be set to the appropriate colour in this array before updating the corresponding VBO
+vec4 boardcolours[1200 * 6];
 
 // location of vertex attributes in the shader program
 GLuint vPosition;
@@ -96,6 +96,10 @@ GLuint vColor;
 // locations of uniform variables in shader program
 GLuint locxsize;
 GLuint locysize;
+
+// for 2D to 3D transformation
+GLUint mvp;
+mat4 model, view, projection;
 
 // VAO and VBO
 GLuint vaoIDs[3]; // One VAO for each object: the grid, the board, the current piece
@@ -162,7 +166,7 @@ void shiftfix(int x, int y)
 void newtile()
 {
 	srand(time(NULL));
-	tilepos = vec2(rand() % 10, 19); // Put the tile at the top of the board
+	tilepos = vec2(rand() % 8, 19); // Put the tile at the top of the board
 
 	int block = rand() % 6;
 	int orientation = rand() % 4;
