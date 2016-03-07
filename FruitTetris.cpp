@@ -217,19 +217,37 @@ void newtile()
 void initGrid()
 {
 	// ***Generate geometry data
-	vec4 gridpoints[64]; // Array containing the 64 points of the 32 total lines to be later put in the VBO
-	vec4 gridcolours[64]; // One colour per vertex
+	vec4 gridpoints[64*2]; // Array containing the 128 points of the 64 (front and back) total lines to be later put in the VBO
+	vec4 gridcolours[64*2]; // One colour per vertex
+
 	// Vertical lines 
 	for (int i = 0; i < 11; i++){
-		gridpoints[2*i] = vec4((33.0 + (33.0 * i)), 33.0, 0, 1);
-		gridpoints[2*i + 1] = vec4((33.0 + (33.0 * i)), 693.0, 0, 1);
-		
+		// Front lines
+		gridpoints[2*i] = vec4((33.0 + (33.0 * i)), 33.0, 20.0, 1);
+		gridpoints[2*i + 1] = vec4((33.0 + (33.0 * i)), 693.0, 20.0, 1);
+
+		// Back lines
+		// The back vertices are 64 away from the front vertices
+		gridpoints[2*i + 64] = vec4((33.0 + (33.0 * i)), 33.0, -20.0, 1);
+		gridpoints[2*i + 64 + 1] = vec4((33.0 + (33.0 * i)), 693.0, -20.0, 1);
 	}
+
 	// Horizontal lines
 	for (int i = 0; i < 21; i++){
-		gridpoints[22 + 2*i] = vec4(33.0, (33.0 + (33.0 * i)), 0, 1);
-		gridpoints[22 + 2*i + 1] = vec4(363.0, (33.0 + (33.0 * i)), 0, 1);
+		// Front lines
+		gridpoints[22 + 2*i] = vec4(33.0, (33.0 + (33.0 * i)), 20.0, 1);
+		gridpoints[22 + 2*i + 1] = vec4(363.0, (33.0 + (33.0 * i)), 20.0, 1);
+
+		// Back lines
+		// The back vertices are 64 away from the front vertices
+		gridpoints[22 + 2*i + 64] = vec4(33.0, (33.0 + (33.0 * i)), -20.0, 1);
+		gridpoints[22 + 2*i + 64 + 1] = vec4(363.0, (33.0 + (33.0 * i)), -20.0, 1);
 	}
+
+
+
+
+
 	// Make all grid lines white
 	for (int i = 0; i < 64; i++)
 		gridcolours[i] = white;
