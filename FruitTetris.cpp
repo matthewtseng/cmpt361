@@ -98,7 +98,7 @@ GLuint locxsize;
 GLuint locysize;
 
 // for 2D to 3D transformation
-GLUint mvp;
+// GLUint locmvp;
 mat4 model, view, projection;
 
 // VAO and VBO
@@ -123,13 +123,26 @@ void updatetile()
 
 		// Create the 4 corners of the square - these vertices are using location in pixels
 		// These vertices are later converted by the vertex shader
-		vec4 p1 = vec4(33.0 + (x * 33.0), 33.0 + (y * 33.0), .4, 1); 
-		vec4 p2 = vec4(33.0 + (x * 33.0), 66.0 + (y * 33.0), .4, 1);
-		vec4 p3 = vec4(66.0 + (x * 33.0), 33.0 + (y * 33.0), .4, 1);
-		vec4 p4 = vec4(66.0 + (x * 33.0), 66.0 + (y * 33.0), .4, 1);
+		vec4 p1 = vec4(33.0 + (x * 33.0), 33.0 + (y * 33.0), 20.1, 1); // front left bottom
+		vec4 p2 = vec4(33.0 + (x * 33.0), 66.0 + (y * 33.0), 20.1, 1); // front left top
+		vec4 p3 = vec4(66.0 + (x * 33.0), 33.0 + (y * 33.0), 20.1, 1); // front right bottom
+		vec4 p4 = vec4(66.0 + (x * 33.0), 66.0 + (y * 33.0), 20.1, 1); // front right top
+
+		vec4 p5 = vec4(33.0 + (x * 33.0), 33.0 + (y * 33.0), -20.1, 1); // back left bottom
+		vec4 p6 = vec4(33.0 + (x * 33.0), 66.0 + (y * 33.0), -20.1, 1); // back left top
+		vec4 p7 = vec4(66.0 + (x * 33.0), 33.0 + (y * 33.0), -20.1, 1); // back right bottom
+		vec4 p8 = vec4(66.0 + (x * 33.0), 66.0 + (y * 33.0), -20.1, 1); // back right top
 
 		// Two points are used by two triangles each
-		vec4 newpoints[6] = {p1, p2, p3, p2, p3, p4}; 
+		// 6 points for a 2D square; 6 * 6 points for a 3D cube
+		vec4 newpoints[36] = {
+								p1, p2, p3, p2, p3, p4, // front side
+								p5, p6, p7, p6, p7, p8, // back side
+								p3, p4, p7, p4, p7, p8, // right side
+								p1, p2, p5, p2, p5, p6, // left side
+								p1, p5, p3, p5, p3, p7, // bottom side
+								p2, p6, p4, p6, p4, p8 // top side
+							}; 
 
 		// Put new data in the VBO
 		glBufferSubData(GL_ARRAY_BUFFER, i*6*sizeof(vec4), 6*sizeof(vec4), newpoints); 
@@ -181,8 +194,8 @@ void newtile()
 	updatetile(); 
 
 	// Update the color VBO of current tile
-	vec4 newcolours[24];
-	for (int i = 0; i < 24; i+=6) {
+	vec4 newcolours[24*6];
+	for (int i = 0; i < 24*6; i+=6) {
 		vec4 currentColour = allColours[rand() % 5];
 		newcolours[i] = currentColour;
 		newcolours[i+1] = currentColour;
