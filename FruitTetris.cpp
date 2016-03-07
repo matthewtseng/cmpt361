@@ -21,8 +21,8 @@ Modified in Sep 2014 by Honghua Li (honghual@sfu.ca).
 using namespace std;
 
 // xsize and ysize represent the window size - updated if window is reshaped to prevent stretching of the game
-int xsize = 400; 
-int ysize = 720;
+float xsize = 400.0; 
+float ysize = 720.0;
 
 // current tile
 vec2 tile[4]; // An array of 4 2d vectors representing displacement from a 'center' piece of the tile, on the grid
@@ -144,7 +144,7 @@ void updatetile()
 							}; 
 
 		// Put new data in the VBO
-		glBufferSubData(GL_ARRAY_BUFFER, i*6*sizeof(vec4), 6*sizeof(vec4), newpoints); 
+		glBufferSubData(GL_ARRAY_BUFFER, i*sizeof(newpoints), sizeof(newpoints), newpoints); 
 	}
 
 	glBindVertexArray(0);
@@ -194,14 +194,55 @@ void newtile()
 
 	// Update the color VBO of current tile
 	vec4 newcolours[24*6];
-	for (int i = 0; i < 24*6; i+=6) {
+	for (int i = 0; i < 24*6; i+=6*6) { // Should make another function for each vertex sign assignment
 		vec4 currentColour = allColours[rand() % 5];
+		// Front side
 		newcolours[i] = currentColour;
 		newcolours[i+1] = currentColour;
 		newcolours[i+2] = currentColour;
 		newcolours[i+3] = currentColour;
 		newcolours[i+4] = currentColour;
-		newcolours[i+5] = currentColour;				
+		newcolours[i+5] = currentColour;
+
+		// Back side
+		newcolours[i+6] = currentColour;
+		newcolours[i+7] = currentColour;
+		newcolours[i+8] = currentColour;
+		newcolours[i+9] = currentColour;
+		newcolours[i+10] = currentColour;
+		newcolours[i+11] = currentColour;	
+
+		// Right side		
+		newcolours[i+12] = currentColour;
+		newcolours[i+13] = currentColour;
+		newcolours[i+14] = currentColour;
+		newcolours[i+15] = currentColour;
+		newcolours[i+16] = currentColour;
+		newcolours[i+17] = currentColour;
+
+		// Left side		
+		newcolours[i+18] = currentColour;
+		newcolours[i+19] = currentColour;
+		newcolours[i+20] = currentColour;
+		newcolours[i+21] = currentColour;
+		newcolours[i+22] = currentColour;
+		newcolours[i+23] = currentColour;
+
+		// Bottom side		
+		newcolours[i+24] = currentColour;
+		newcolours[i+25] = currentColour;
+		newcolours[i+26] = currentColour;
+		newcolours[i+27] = currentColour;
+		newcolours[i+28] = currentColour;
+		newcolours[i+29] = currentColour;
+
+		// Top side		
+		newcolours[i+30] = currentColour;
+		newcolours[i+31] = currentColour;
+		newcolours[i+32] = currentColour;
+		newcolours[i+33] = currentColour;
+		newcolours[i+34] = currentColour;
+		newcolours[i+35] = currentColour;		
 	}
 
 	glBindBuffer(GL_ARRAY_BUFFER, vboIDs[5]); // Bind the VBO containing current tile vertex colours
@@ -402,7 +443,7 @@ void init()
 	locysize = glGetUniformLocation(program, "ysize");
 	locMVP = glGetUniformLocation(program, "MVP");
 
-	view = LookAt(vec3(33*3, 33*11, 1000), vec3(33*5, 33*10, 0), vec3(0,1,0));
+	view = LookAt(vec3(33*3, 33*11, 1250), vec3(35*5, 33*10, 0), vec3(0,1,0)); // eye, center, up
 	// Game initialization
 	newtile(); // create new next tile
 
@@ -532,7 +573,7 @@ void checkfullrow(int row)
 // Places the current tile - update the board vertex colour VBO and the array maintaining occupied cells
 void settile()
 {
-	vec4 colours[24];
+	vec4 colours[24*6];
 	glBindBuffer(GL_ARRAY_BUFFER, vboIDs[5]);
 	glGetBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(colours), colours);
 
@@ -542,12 +583,53 @@ void settile()
 		int locY = tilepos[1] + tile[i][1];
 		board[locX][locY] = true;
 
-		boardcolours[locX * 6 + locY * 60] 		= colours[i * 6];
-		boardcolours[locX * 6 + locY * 60 + 1] 	= colours[i * 6 + 1];
-		boardcolours[locX * 6 + locY * 60 + 2] 	= colours[i * 6 + 2];
-		boardcolours[locX * 6 + locY * 60 + 3] 	= colours[i * 6 + 3];
-		boardcolours[locX * 6 + locY * 60 + 4] 	= colours[i * 6 + 4];
-		boardcolours[locX * 6 + locY * 60 + 5] 	= colours[i * 6 + 5];
+		// Front side
+		boardcolours[36*(locX + locY * 10)] 	= colours[i * 36];
+		boardcolours[36*(locX + locY * 10) + 1] = colours[i * 36 + 1];
+		boardcolours[36*(locX + locY * 10) + 2] = colours[i * 36 + 2];
+		boardcolours[36*(locX + locY * 10) + 3] = colours[i * 36 + 3];
+		boardcolours[36*(locX + locY * 10) + 4] = colours[i * 36 + 4];
+		boardcolours[36*(locX + locY * 10) + 5] = colours[i * 36 + 5];
+
+		// Back side
+		boardcolours[36*(locX + locY * 10) + 6] = colours[i * 36 + 6];
+		boardcolours[36*(locX + locY * 10) + 7] = colours[i * 36 + 7];
+		boardcolours[36*(locX + locY * 10) + 8] = colours[i * 36 + 8];
+		boardcolours[36*(locX + locY * 10) + 9]	= colours[i * 36 + 9];
+		boardcolours[36*(locX + locY * 10) + 10] = colours[i * 36 + 10];
+		boardcolours[36*(locX + locY * 10) + 11] = colours[i * 36 + 11];
+
+		// Right side
+		boardcolours[36*(locX + locY * 10) + 12] = colours[i * 36 + 12];
+		boardcolours[36*(locX + locY * 10) + 13] = colours[i * 36 + 13];
+		boardcolours[36*(locX + locY * 10) + 14] = colours[i * 36 + 14];
+		boardcolours[36*(locX + locY * 10) + 15] = colours[i * 36 + 15];
+		boardcolours[36*(locX + locY * 10) + 16] = colours[i * 36 + 16];
+		boardcolours[36*(locX + locY * 10) + 17] = colours[i * 36 + 17];
+
+		// Left side
+		boardcolours[36*(locX + locY * 10) + 18] = colours[i * 36 + 18];
+		boardcolours[36*(locX + locY * 10) + 19] = colours[i * 36 + 19];
+		boardcolours[36*(locX + locY * 10) + 20] = colours[i * 36 + 20];
+		boardcolours[36*(locX + locY * 10) + 21] = colours[i * 36 + 21];
+		boardcolours[36*(locX + locY * 10) + 22] = colours[i * 36 + 22];
+		boardcolours[36*(locX + locY * 10) + 23] = colours[i * 36 + 23];	
+
+		// Bottom side
+		boardcolours[36*(locX + locY * 10) + 24] = colours[i * 36 + 24];
+		boardcolours[36*(locX + locY * 10) + 25] = colours[i * 36 + 25];
+		boardcolours[36*(locX + locY * 10) + 26] = colours[i * 36 + 26];
+		boardcolours[36*(locX + locY * 10) + 27] = colours[i * 36 + 27];
+		boardcolours[36*(locX + locY * 10) + 28] = colours[i * 36 + 28];
+		boardcolours[36*(locX + locY * 10) + 29] = colours[i * 36 + 29];
+
+		// Top side
+		boardcolours[36*(locX + locY * 10) + 30] = colours[i * 36 + 30];
+		boardcolours[36*(locX + locY * 10) + 31] = colours[i * 36 + 31];
+		boardcolours[36*(locX + locY * 10) + 32] = colours[i * 36 + 32];
+		boardcolours[36*(locX + locY * 10) + 33] = colours[i * 36 + 33];
+		boardcolours[36*(locX + locY * 10) + 34] = colours[i * 36 + 34];
+		boardcolours[36*(locX + locY * 10) + 35] = colours[i * 36 + 35];							
 	}
 
 	// Checks if rows are full and shifts down the rows above (does not work entirely)
@@ -557,7 +639,7 @@ void settile()
 	// }
 
 	glBindBuffer(GL_ARRAY_BUFFER, vboIDs[3]);
-	glBufferData(GL_ARRAY_BUFFER, 1200*sizeof(vec4), boardcolours, GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, 1200*6*sizeof(vec4), boardcolours, GL_DYNAMIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 }
@@ -581,7 +663,7 @@ void display()
 	glUniform1i(locxsize, xsize); // x and y sizes are passed to the shader program to maintain shape of the vertices on screen
 	glUniform1i(locysize, ysize);
 
-	projection = Perspective(45, GLfloat(xsize/ysize), 0.1, 200);
+	projection = Perspective(45, xsize/ysize, 0.1, 500);
 	model = Translate(0, 0, 0); 	
 
 	mat4 MVP = projection * model * view;
@@ -629,12 +711,20 @@ void special(int key, int x, int y)
 			}
 			break;
 		case GLUT_KEY_RIGHT:
+			// If CTRL + right is held down
+			if (glutGetModifiers() == GLUT_ACTIVE_CTRL) 
+				view = view * RotateY(10);
+
 			if (movetile(vec2(1,0))) {
 				tilepos[0] = tilepos[0] + 1;
 				updatetile();
 			}
 			break;
 		case GLUT_KEY_LEFT:
+			// If CTRL + left is held down
+			if (glutGetModifiers() == GLUT_ACTIVE_CTRL) 
+				view = view * RotateY(-10);
+
 			if (movetile(vec2(-1,0))) {
 				tilepos[0] = tilepos[0] - 1;	
 				updatetile();
