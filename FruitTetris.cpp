@@ -24,6 +24,9 @@ using namespace std;
 float xsize = 400.0; 
 float ysize = 720.0;
 
+// global variable for camera
+float cameraangle = 0.0;
+
 // current tile
 vec2 tile[4]; // An array of 4 2d vectors representing displacement from a 'center' piece of the tile, on the grid
 vec2 tilepos = vec2(5, 19); // The position of the current tile using grid coordinates ((0,0) is the bottom left corner)
@@ -77,9 +80,13 @@ vec4 green = vec4(0.0, 0.5, 0.0, 1.0); // pear
 vec4 yellow = vec4(0.9, 0.9, 0.0, 1.0); // banana
 vec4 white  = vec4(1.0, 1.0, 1.0, 1.0);
 vec4 black  = vec4(0.0, 0.0, 0.0, 1.0);
+vec4 transparent = vec4(0.0, 0.0, 0.0, 0.0); 
+vec4 translucent = vec4(1.0, 1.0, 1.0, 0.4);
 
 // all colours
 vec4 allColours[5] = {orange, red, purple, green, yellow};
+
+
 
 // board[x][y] represents whether the cell (x,y) is occupied
 bool board[10][20]; 
@@ -135,12 +142,12 @@ void updatetile()
 		// Two points are used by two triangles each
 		// 6 points for a 2D square; 6 * 6 points for a 3D cube
 		vec4 newpoints[36] = {
-								p1, p2, p3, p2, p3, p4, // front side
-								p5, p6, p7, p6, p7, p8, // back side
-								p3, p4, p7, p4, p7, p8, // right side
-								p1, p2, p5, p2, p5, p6, // left side
-								p1, p5, p3, p5, p3, p7, // bottom side
-								p2, p6, p4, p6, p4, p8 // top side
+								p2, p1, p3, p2, p3, p4, // front side
+								p5, p6, p7, p6, p8, p7, // back side
+								p4, p3, p7, p4, p7, p8, // right side
+								p2, p6, p5, p2, p5, p1, // left side
+								p1, p5, p7, p1, p7, p3, // bottom side
+								p6, p2, p4, p6, p4, p8 // top side
 							}; 
 
 		// Put new data in the VBO
@@ -284,9 +291,9 @@ void initGrid()
 		gridpoints[22 + 2*i + 64 + 1] = vec4(363.0, (33.0 + (33.0 * i)), -33.0, 1);
 	}
 
-	// Make all grid lines white
+	// Make all grid lines feint
 	for (int i = 0; i < 64*2; i++)
-		gridcolours[i] = white;
+		gridcolours[i] = translucent;
 
 	// *** set up buffer objects
 	// Set up first VAO (representing grid lines)
@@ -312,7 +319,7 @@ void initBoard()
 	// Generate the geometric data
 	vec4 boardpoints[1200*6];
 	for (int i = 0; i < 1200*6; i++)
-		boardcolours[i] = black; // Let the empty cells on the board be black
+		boardcolours[i] = transparent; // Let the empty cells on the board be black
 
 	// Each cell is a square (2 triangles with 6 vertices)
 	for (int i = 0; i < 20; i++){
@@ -329,8 +336,8 @@ void initBoard()
 			vec4 p8 = vec4(66.0 + (j * 33.0), 66.0 + (i * 33.0), -33.1, 1); // back right top
 			
 			// Front side
-			boardpoints[36*(10*i + j)    ] 	= p1;
-			boardpoints[36*(10*i + j) + 1] 	= p2;
+			boardpoints[36*(10*i + j)    ] 	= p2;
+			boardpoints[36*(10*i + j) + 1] 	= p1;
 			boardpoints[36*(10*i + j) + 2] 	= p3;
 			boardpoints[36*(10*i + j) + 3] 	= p2;
 			boardpoints[36*(10*i + j) + 4] 	= p3;
@@ -340,37 +347,37 @@ void initBoard()
 			boardpoints[36*(10*i + j) + 6] = p5;
 			boardpoints[36*(10*i + j) + 7] = p6;
 			boardpoints[36*(10*i + j) + 8] = p7;
-			boardpoints[36*(10*i + j) + 9] = p6;
+			boardpoints[36*(10*i + j) + 9] = p8;
 			boardpoints[36*(10*i + j) + 10] = p7;
-			boardpoints[36*(10*i + j) + 11] = p8;
+			boardpoints[36*(10*i + j) + 11] = p6;
 
 			// Right side
-			boardpoints[36*(10*i + j) + 12] = p3;
-			boardpoints[36*(10*i + j) + 13] = p4;
+			boardpoints[36*(10*i + j) + 12] = p4;
+			boardpoints[36*(10*i + j) + 13] = p3;
 			boardpoints[36*(10*i + j) + 14] = p7;
-			boardpoints[36*(10*i + j) + 15] = p4;
-			boardpoints[36*(10*i + j) + 16] = p7;
-			boardpoints[36*(10*i + j) + 17] = p8;
+			boardpoints[36*(10*i + j) + 15] = p8;
+			boardpoints[36*(10*i + j) + 16] = p4;
+			boardpoints[36*(10*i + j) + 17] = p7;
 
 			// Left side
-			boardpoints[36*(10*i + j) + 18] = p1;
-			boardpoints[36*(10*i + j) + 19] = p2;
-			boardpoints[36*(10*i + j) + 20] = p5;
-			boardpoints[36*(10*i + j) + 21] = p2;
-			boardpoints[36*(10*i + j) + 22] = p5;
-			boardpoints[36*(10*i + j) + 23] = p6;
+			boardpoints[36*(10*i + j) + 18] = p6;
+			boardpoints[36*(10*i + j) + 19] = p5;
+			boardpoints[36*(10*i + j) + 20] = p1;
+			boardpoints[36*(10*i + j) + 21] = p6;
+			boardpoints[36*(10*i + j) + 22] = p1;
+			boardpoints[36*(10*i + j) + 23] = p2;
 
 			// Bottom side
-			boardpoints[36*(10*i + j) + 24] = p1;
-			boardpoints[36*(10*i + j) + 25] = p5;
-			boardpoints[36*(10*i + j) + 26] = p3;
-			boardpoints[36*(10*i + j) + 27] = p5;
-			boardpoints[36*(10*i + j) + 28] = p3;
-			boardpoints[36*(10*i + j) + 29] = p7;
+			boardpoints[36*(10*i + j) + 24] = p5;
+			boardpoints[36*(10*i + j) + 25] = p7;
+			boardpoints[36*(10*i + j) + 26] = p1;
+			boardpoints[36*(10*i + j) + 27] = p1;
+			boardpoints[36*(10*i + j) + 28] = p7;
+			boardpoints[36*(10*i + j) + 29] = p3;
 
 			// Top side
-			boardpoints[36*(10*i + j) + 30] = p2;
-			boardpoints[36*(10*i + j) + 31] = p6;
+			boardpoints[36*(10*i + j) + 30] = p6;
+			boardpoints[36*(10*i + j) + 31] = p2;
 			boardpoints[36*(10*i + j) + 32] = p4;
 			boardpoints[36*(10*i + j) + 33] = p6;
 			boardpoints[36*(10*i + j) + 34] = p4;
@@ -443,16 +450,19 @@ void init()
 	locysize = glGetUniformLocation(program, "ysize");
 	locMVP = glGetUniformLocation(program, "MVP");
 
-	view = LookAt(vec3(33*3, 33*11, 1250), vec3(35*5, 33*10, 0), vec3(0,1,0)); // eye, center, up
 	// Game initialization
 	newtile(); // create new next tile
 
 	// set to default
 	glBindVertexArray(0);
+	glEnable(GL_CULL_FACE);
+	glFrontFace(GL_CW);
 	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);	
 	glEnable(GL_DEPTH_TEST);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glDepthFunc(GL_LEQUAL);
+	glDepthFunc(GL_LESS);	
+	glEnable(GL_ALPHA_TEST);
+	glAlphaFunc(GL_GREATER, 0);
 	glClearDepth(1.0);
 	glClearColor(0, 0, 0, 0);
 }
@@ -664,11 +674,11 @@ void display()
 	glUniform1i(locysize, ysize);
 
 	projection = Perspective(45, xsize/ysize, 0.1, 500);
-	model = Translate(0, 0, 0); 	
+	model = Translate(0, 0, 0); 
+	view = LookAt(vec4(33*5 + 1000*sin(cameraangle), 33*11, 1000*cos(cameraangle), 1), vec4(35*5, 33*10, 0, 0), vec4(0, 1, 0, 0)); // eye, center, up	
 
-	mat4 MVP = projection * model * view;
+	mat4 MVP = projection * view * model;
 	glUniformMatrix4fv(locMVP, 1, GL_TRUE, MVP);
-
 
 	glBindVertexArray(vaoIDs[1]); // Bind the VAO representing the grid cells (to be drawn first)
 	glDrawArrays(GL_TRIANGLES, 0, 1200*6); // Draw the board (10*20*2*2 = 800 triangles)
@@ -712,8 +722,11 @@ void special(int key, int x, int y)
 			break;
 		case GLUT_KEY_RIGHT:
 			// If CTRL + right is held down
-			if (glutGetModifiers() == GLUT_ACTIVE_CTRL) 
-				view = view * RotateY(10);
+			if (glutGetModifiers() == GLUT_ACTIVE_CTRL) {
+				cameraangle += 0.1;
+				if (cameraangle > 2*M_PI)
+					cameraangle = cameraangle - 2*M_PI;
+			}
 
 			if (movetile(vec2(1,0))) {
 				tilepos[0] = tilepos[0] + 1;
@@ -722,8 +735,11 @@ void special(int key, int x, int y)
 			break;
 		case GLUT_KEY_LEFT:
 			// If CTRL + left is held down
-			if (glutGetModifiers() == GLUT_ACTIVE_CTRL) 
-				view = view * RotateY(-10);
+			if (glutGetModifiers() == GLUT_ACTIVE_CTRL) {
+				cameraangle -= 0.1;
+				if (cameraangle < 0) 
+					cameraangle = cameraangle + 2*M_PI;
+			}
 
 			if (movetile(vec2(-1,0))) {
 				tilepos[0] = tilepos[0] - 1;	
