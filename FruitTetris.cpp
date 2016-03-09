@@ -86,8 +86,6 @@ vec4 translucent = vec4(1.0, 1.0, 1.0, 0.4);
 // all colours
 vec4 allColours[5] = {orange, red, purple, green, yellow};
 
-
-
 // board[x][y] represents whether the cell (x,y) is occupied
 bool board[10][20]; 
 
@@ -103,6 +101,7 @@ GLuint vColor;
 // locations of uniform variables in shader program
 GLuint locxsize;
 GLuint locysize;
+
 // for 2D to 3D transformation
 GLuint locMVP;
 mat4 model, view, projection;
@@ -129,15 +128,15 @@ void updatetile()
 
 		// Create the 4 corners of the square - these vertices are using location in pixels
 		// These vertices are later converted by the vertex shader
-		vec4 p1 = vec4(33.0 + (x * 33.0), 33.0 + (y * 33.0), 33.1, 1); // front left bottom
-		vec4 p2 = vec4(33.0 + (x * 33.0), 66.0 + (y * 33.0), 33.1, 1); // front left top
-		vec4 p3 = vec4(66.0 + (x * 33.0), 33.0 + (y * 33.0), 33.1, 1); // front right bottom
-		vec4 p4 = vec4(66.0 + (x * 33.0), 66.0 + (y * 33.0), 33.1, 1); // front right top
+		vec4 p1 = vec4(33.0 + (x * 33.0), 33.0 + (y * 33.0), 16.5, 1); // front left bottom
+		vec4 p2 = vec4(33.0 + (x * 33.0), 66.0 + (y * 33.0), 16.5, 1); // front left top
+		vec4 p3 = vec4(66.0 + (x * 33.0), 33.0 + (y * 33.0), 16.5, 1); // front right bottom
+		vec4 p4 = vec4(66.0 + (x * 33.0), 66.0 + (y * 33.0), 16.5, 1); // front right top
 
-		vec4 p5 = vec4(33.0 + (x * 33.0), 33.0 + (y * 33.0), -33.1, 1); // back left bottom
-		vec4 p6 = vec4(33.0 + (x * 33.0), 66.0 + (y * 33.0), -33.1, 1); // back left top
-		vec4 p7 = vec4(66.0 + (x * 33.0), 33.0 + (y * 33.0), -33.1, 1); // back right bottom
-		vec4 p8 = vec4(66.0 + (x * 33.0), 66.0 + (y * 33.0), -33.1, 1); // back right top
+		vec4 p5 = vec4(33.0 + (x * 33.0), 33.0 + (y * 33.0), -16.5, 1); // back left bottom
+		vec4 p6 = vec4(33.0 + (x * 33.0), 66.0 + (y * 33.0), -16.5, 1); // back left top
+		vec4 p7 = vec4(66.0 + (x * 33.0), 33.0 + (y * 33.0), -16.5, 1); // back right bottom
+		vec4 p8 = vec4(66.0 + (x * 33.0), 66.0 + (y * 33.0), -16.5, 1); // back right top
 
 		// Two points are used by two triangles each
 		// 6 points for a 2D square; 6 * 6 points for a 3D cube
@@ -270,25 +269,25 @@ void initGrid()
 	// Vertical lines 
 	for (int i = 0; i < 11; i++){
 		// Front lines
-		gridpoints[2*i] = vec4((33.0 + (33.0 * i)), 33.0, 33.0, 1);
-		gridpoints[2*i + 1] = vec4((33.0 + (33.0 * i)), 693.0, 33.0, 1);
+		gridpoints[2*i] = vec4((33.0 + (33.0 * i)), 33.0, 16.5, 1);
+		gridpoints[2*i + 1] = vec4((33.0 + (33.0 * i)), 693.0, 16.5, 1);
 
 		// Back lines
 		// The back vertices are 64 away from the front vertices
-		gridpoints[2*i + 64] = vec4((33.0 + (33.0 * i)), 33.0, -33.0, 1);
-		gridpoints[2*i + 64 + 1] = vec4((33.0 + (33.0 * i)), 693.0, -33.0, 1);
+		gridpoints[2*i + 64] = vec4((33.0 + (33.0 * i)), 33.0, -16.5, 1);
+		gridpoints[2*i + 64 + 1] = vec4((33.0 + (33.0 * i)), 693.0, -16.5, 1);
 	}
 
 	// Horizontal lines
 	for (int i = 0; i < 21; i++){
 		// Front lines
-		gridpoints[22 + 2*i] = vec4(33.0, (33.0 + (33.0 * i)), 33.0, 1);
-		gridpoints[22 + 2*i + 1] = vec4(363.0, (33.0 + (33.0 * i)), 33.0, 1);
+		gridpoints[22 + 2*i] = vec4(33.0, (33.0 + (33.0 * i)), 16.5, 1);
+		gridpoints[22 + 2*i + 1] = vec4(363.0, (33.0 + (33.0 * i)), 16.5, 1);
 
 		// Back lines
 		// The back vertices are 64 away from the front vertices
-		gridpoints[22 + 2*i + 64] = vec4(33.0, (33.0 + (33.0 * i)), -33.0, 1);
-		gridpoints[22 + 2*i + 64 + 1] = vec4(363.0, (33.0 + (33.0 * i)), -33.0, 1);
+		gridpoints[22 + 2*i + 64] = vec4(33.0, (33.0 + (33.0 * i)), -16.5, 1);
+		gridpoints[22 + 2*i + 64 + 1] = vec4(363.0, (33.0 + (33.0 * i)), -16.5, 1);
 	}
 
 	// Make all grid lines feint
@@ -325,15 +324,15 @@ void initBoard()
 	for (int i = 0; i < 20; i++){
 		for (int j = 0; j < 10; j++)
 		{		
-			vec4 p1 = vec4(33.0 + (j * 33.0), 33.0 + (i * 33.0), 33.1, 1); // front left bottom
-			vec4 p2 = vec4(33.0 + (j * 33.0), 66.0 + (i * 33.0), 33.1, 1); // front left top
-			vec4 p3 = vec4(66.0 + (j * 33.0), 33.0 + (i * 33.0), 33.1, 1); // front right bottom
-			vec4 p4 = vec4(66.0 + (j * 33.0), 66.0 + (i * 33.0), 33.1, 1); // front right top
+			vec4 p1 = vec4(33.0 + (j * 33.0), 33.0 + (i * 33.0), 16.5, 1); // front left bottom
+			vec4 p2 = vec4(33.0 + (j * 33.0), 66.0 + (i * 33.0), 16.5, 1); // front left top
+			vec4 p3 = vec4(66.0 + (j * 33.0), 33.0 + (i * 33.0), 16.5, 1); // front right bottom
+			vec4 p4 = vec4(66.0 + (j * 33.0), 66.0 + (i * 33.0), 16.5, 1); // front right top
 
-			vec4 p5 = vec4(33.0 + (j * 33.0), 33.0 + (i * 33.0), -33.1, 1); // back left bottom
-			vec4 p6 = vec4(33.0 + (j * 33.0), 66.0 + (i * 33.0), -33.1, 1); // back left top
-			vec4 p7 = vec4(66.0 + (j * 33.0), 33.0 + (i * 33.0), -33.1, 1); // back right bottom
-			vec4 p8 = vec4(66.0 + (j * 33.0), 66.0 + (i * 33.0), -33.1, 1); // back right top
+			vec4 p5 = vec4(33.0 + (j * 33.0), 33.0 + (i * 33.0), -16.5, 1); // back left bottom
+			vec4 p6 = vec4(33.0 + (j * 33.0), 66.0 + (i * 33.0), -16.5, 1); // back left top
+			vec4 p7 = vec4(66.0 + (j * 33.0), 33.0 + (i * 33.0), -16.5, 1); // back right bottom
+			vec4 p8 = vec4(66.0 + (j * 33.0), 66.0 + (i * 33.0), -16.5, 1); // back right top
 			
 			// Front side
 			boardpoints[36*(10*i + j)    ] 	= p2;
@@ -675,7 +674,7 @@ void display()
 
 	projection = Perspective(45, xsize/ysize, 0.1, 500);
 	model = Translate(0, 0, 0); 
-	view = LookAt(vec4(33*5 + 1000*sin(cameraangle), 33*11, 1000*cos(cameraangle), 1), vec4(35*5, 33*10, 0, 0), vec4(0, 1, 0, 0)); // eye, center, up	
+	view = LookAt(vec4(33*5 + 1250*sin(cameraangle), 33*11, 1250*cos(cameraangle), 1), vec4(35*5, 33*10, 0, 0), vec4(0, 1, 0, 0)); // eye, center, up	
 
 	mat4 MVP = projection * view * model;
 	glUniformMatrix4fv(locMVP, 1, GL_TRUE, MVP);
